@@ -85,6 +85,11 @@ export type Options =
       androidParams: AndroidOptions;
     };
 
+export type ExportOptions = Partial<Options> & {
+  filename: string;
+  overwrite?: boolean;
+}
+
 export class ReactNativeTts extends RN.NativeEventEmitter {
   getInitStatus: () => Promise<"success">;
   requestInstallEngine: () => Promise<"success">;
@@ -100,6 +105,7 @@ export class ReactNativeTts extends RN.NativeEventEmitter {
   engines: () => Promise<Engine[]>;
   /** Read the sentence and return an id for the task. */
   speak: (utterance: string, options?: Options) => string | number;
+  export: (utterance: string, options: ExportOptions) => Promise<string>;
   stop: (onWordBoundary?: boolean) => Promise<boolean>;
   pause: (onWordBoundary?: boolean) => Promise<boolean>;
   resume: () => Promise<boolean>;

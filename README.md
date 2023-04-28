@@ -1,4 +1,4 @@
-# React Native TTS
+# React Native TTS (with export to audio file)
 
 React Native TTS is a text-to-speech library for [React Native](https://facebook.github.io/react-native/) on iOS, Android and Windows.
 
@@ -12,8 +12,8 @@ React Native TTS is a text-to-speech library for [React Native](https://facebook
 ## Install
 
 ```shell
-npm install --save react-native-tts
-react-native link react-native-tts
+npm install --save @react-native-community/react-native-tts
+react-native link @react-native-community/react-native-tts
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ react-native link react-native-tts
 ### Imports
 
 ```js
-import Tts from 'react-native-tts';
+import Tts from '@react-native-community/react-native-tts';
 ```
 
 #### Windows
@@ -85,6 +85,16 @@ Stop speaking and flush the TTS queue.
 ```js
 Tts.stop();
 ```
+
+### Exporting to Audio File (Android/Windows not yet implemented)
+
+Exports an utterance to an audio file that can be used for track playing with [react-native-track-player](https://www.npmjs.com/package/react-native-track-player) or used by another app. For iOS, this will generate a .caf file; on Android and Windows, a .wav file.
+
+```js
+const filepath = await Tts.export('Hello, world!', { filename: 'myfile' });
+```
+
+Additionally, export() takes in all of the same parameters as speak().
 
 ### Waiting for initialization
 

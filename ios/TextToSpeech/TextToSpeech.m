@@ -13,7 +13,7 @@
 #import "TextToSpeech.h"
 
 @implementation TextToSpeech {
-    NSString * _ignoreSilentSwitch;
+  NSString * _ignoreSilentSwitch;
 }
 
 @synthesize bridge = _bridge;
@@ -22,25 +22,25 @@ RCT_EXPORT_MODULE()
 
 -(NSArray<NSString *> *)supportedEvents
 {
-    return @[@"tts-start", @"tts-finish", @"tts-pause", @"tts-resume", @"tts-progress", @"tts-cancel"];
+  return @[@"tts-start", @"tts-finish", @"tts-pause", @"tts-resume", @"tts-progress", @"tts-cancel", @"tts-export"];
 }
 
 -(instancetype)init
 {
-    self = [super init];
-    if (self) {
-        _synthesizer = [AVSpeechSynthesizer new];
-        _synthesizer.delegate = self;
-        _ducking = false;
-        _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
-    }
-
-    return self;
+  self = [super init];
+  if (self) {
+    _synthesizer = [AVSpeechSynthesizer new];
+    _synthesizer.delegate = self;
+    _ducking = false;
+    _ignoreSilentSwitch = @"inherit"; // inherit, ignore, obey
+  }
+  
+  return self;
 }
 
 + (BOOL)requiresMainQueueSetup
 {
-    return YES;
+  return YES;
 }
 
 RCT_EXPORT_METHOD(speak:(NSString *)text
@@ -48,9 +48,60 @@ RCT_EXPORT_METHOD(speak:(NSString *)text
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
+  if(!text) {
+    reject(@"no_text", @"No text to speak", nil);
+    return;
+  }
+  
+  AVSpeechUtterance *utterance = [[AVSpeechUtterance alloc] initWithString:text];
+  
+  NSString* voice = [params valueForKey:@"iosVoiceId"];
+  if (voice) {
+    utterance.voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voice];
+  } else if (_defaultVoice) {
+    utterance.voice = _defaultVoice;
+  }
+  
+  float rate = [[params valueForKey:@"rate"] floatValue];
+  if (rate) {
+    if(rate > AVSpeechUtteranceMinimumSpeechRate && rate < AVSpeechUtteranceMaximumSpeechRate) {
+      utterance.rate = rate;
+    } else {
+      reject(@"bad_rate", @"Wrong rate value", nil);
+      return;
+    }
+  } else if (_defaultRate) {
+    utterance.rate = _defaultRate;
+  }
+  
+  if (_defaultPitch) {
+    utterance.pitchMultiplier = _defaultPitch;
+  }
+  
+  if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+  } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
+  }
+  
+  [self.synthesizer speakUtterance:utterance];
+  resolve([NSNumber numberWithUnsignedLong:utterance.hash]);
+}
+
+RCT_EXPORT_METHOD(export:(NSString *)text
+                  params:(NSDictionary *)params
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
     if(!text) {
         reject(@"no_text", @"No text to speak", nil);
         return;
+    }
+  
+    NSString* filename = [params valueForKey:@"filename"];
+    if(!filename) {
+      reject(@"no_filename", @"No filename specified", nil);
+      return;
     }
 
     AVSpeechUtterance *utterance = [[AVSpeechUtterance alloc] initWithString:text];
@@ -77,15 +128,46 @@ RCT_EXPORT_METHOD(speak:(NSString *)text
     if (_defaultPitch) {
         utterance.pitchMultiplier = _defaultPitch;
     }
-
-    if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
-        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-    } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
-        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
+  
+    __block AVAudioFile* output;
+    NSString* documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    NSURL* outputURL = [NSURL fileURLWithPath:[documentsPath stringByAppendingPathComponent:[filename stringByAppendingPathExtension:@"caf"]]];
+  
+    if ([[params valueForKey:@"overwrite"] boolValue] == YES) {
+      [[NSFileManager defaultManager] removeItemAtURL:outputURL error:nil];
+    } else
+    if ([[NSFileManager defaultManager] fileExistsAtPath:outputURL.path]) {
+      resolve(outputURL.absoluteString);
+      return;
     }
-
-    [self.synthesizer speakUtterance:utterance];
-    resolve([NSNumber numberWithUnsignedLong:utterance.hash]);
+  
+    [self.synthesizer writeUtterance:utterance toBufferCallback:^(AVAudioBuffer * _Nonnull buffer) {
+      if (![buffer isKindOfClass:[AVAudioPCMBuffer class]]) {
+        reject(@"AVAudio Error", @"Unknown buffer type", nil);
+        return;
+      }
+      AVAudioPCMBuffer* pcmBuffer = (AVAudioPCMBuffer *)buffer;
+      if (pcmBuffer.frameLength == 0) {
+        // Done
+        resolve(output.url.absoluteString);
+        return;
+      } else {
+        if (output == nil) {
+          NSError* error = nil;
+          output = [[AVAudioFile alloc] initForWriting:outputURL settings:pcmBuffer.format.settings commonFormat: AVAudioPCMFormatInt16 interleaved: NO error:&error];
+          if (error != nil) {
+            reject(@"AVAudio Error", @"Load AVAudio file failed", error);
+            return;
+          }
+        }
+        NSError* error = nil;
+        [output writeFromBuffer:pcmBuffer error:&error];
+        if (error != nil) {
+          reject(@"AVAudio Error", @"Write AVAudio file failed", error);
+          return;
+        }
+      }
+    }];
 }
 
 RCT_EXPORT_METHOD(stop:(BOOL *)onWordBoundary resolve:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
