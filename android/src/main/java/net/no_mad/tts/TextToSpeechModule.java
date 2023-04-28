@@ -238,12 +238,12 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
     public void export(String utterance, ReadableMap params, Promise promise) {
         if(notReady(promise)) return;
         
-        if (!params.hasKey("filename")) {
-          promise.reject("missing filename");
+        if (!params.hasKey("KEY_PARAM_FILENAME")) {
+          promise.reject("missing KEY_PARAM_FILENAME");
           return;
         }
         
-        String filename = params.getString("filename");
+        String filename = params.getString("KEY_PARAM_FILENAME");
 
         if (filename.length() == 0) {
             promise.reject("missing filename");
@@ -493,7 +493,7 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
         float volume = inputParams.hasKey("KEY_PARAM_VOLUME") ? (float) inputParams.getDouble("KEY_PARAM_VOLUME") : 1.0f;
         float pan = inputParams.hasKey("KEY_PARAM_PAN") ? (float) inputParams.getDouble("KEY_PARAM_PAN") : 0.0f;
         
-        String filename = inputParams.hasKey("filename") ? inputParams.getString("filename") : "";
+        String filename = inputParams.hasKey("KEY_PARAM_FILENAME") ? inputParams.getString("KEY_PARAM_FILENAME") : "";
         File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
         boolean overwrite = inputParams.hasKey("overwrite") ? inputParams.getBoolean("overwrite") : false;
         
