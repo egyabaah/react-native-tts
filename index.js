@@ -103,6 +103,7 @@ class Tts extends NativeEventEmitter {
       } else {
         return TextToSpeech.export(utterance, {
           KEY_PARAM_FILENAME: options.filename,
+          KEY_PARAM_OVERWRITE: options.overwrite,
           ...(options.androidParams || {}),
         });
       }
