@@ -130,7 +130,7 @@ RCT_EXPORT_METHOD(export:(NSString *)text
     }
   
     __block AVAudioFile* output;
-    NSString* documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    NSString* documentsPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
     NSURL* outputURL = [NSURL fileURLWithPath:[documentsPath stringByAppendingPathComponent:[filename stringByAppendingPathExtension:@"caf"]]];
   
     if ([[params valueForKey:@"overwrite"] boolValue] == YES) {

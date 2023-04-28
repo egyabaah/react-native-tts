@@ -5,7 +5,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
-import android.app.Activity;
 import android.net.Uri;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -259,13 +258,13 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
             promise.reject("filename is empty");
             return;
         }
-        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".mp3");
+        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
 
         String utteranceId = Integer.toString(utterance.hashCode());
 
         int speakResult = speak(utterance, utteranceId, params);
         if(speakResult == TextToSpeech.SUCCESS) {
-            promise.resolve(Uri.fromFile(destinationFile).toString());
+            promise.resolve(destinationFile.getPath());
         } else {
             resolvePromiseWithStatusCode(speakResult, promise);
         }
