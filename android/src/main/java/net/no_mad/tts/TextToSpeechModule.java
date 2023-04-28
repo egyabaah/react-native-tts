@@ -16,6 +16,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import com.facebook.react.bridge.*;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -231,6 +232,34 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
         } else {
             resolvePromiseWithStatusCode(speakResult, promise);
         }
+    }
+
+    @ReactMethod
+    public void export(String utterance, ReadableMap params, Promise promise) {
+        if(notReady(promise)) return;
+        
+        if (!params.hasKey("filename")) {
+          promise.reject("missing filename");
+          return;
+        }
+        
+        String filename = params.getString("filename");
+
+        if (filename.length() == 0) {
+            promise.reject("missing filename");
+            return;
+        }
+        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
+
+        String utteranceId = Integer.toString(utterance.hashCode());
+
+        int speakResult = speak(utterance, utteranceId, params);
+        if(speakResult == TextToSpeech.SUCCESS) {
+            promise.resolve(destinationFile.getPath());
+        } else {
+            resolvePromiseWithStatusCode(speakResult, promise);
+        }
+    
     }
 
     @ReactMethod
@@ -463,6 +492,12 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
         String audioStreamTypeString = inputParams.hasKey("KEY_PARAM_STREAM") ? inputParams.getString("KEY_PARAM_STREAM") : "";
         float volume = inputParams.hasKey("KEY_PARAM_VOLUME") ? (float) inputParams.getDouble("KEY_PARAM_VOLUME") : 1.0f;
         float pan = inputParams.hasKey("KEY_PARAM_PAN") ? (float) inputParams.getDouble("KEY_PARAM_PAN") : 0.0f;
+        
+        String filename = inputParams.hasKey("filename") ? inputParams.getString("filename") : "";
+        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
+        boolean overwrite = inputParams.hasKey("overwrite") ? inputParams.getBoolean("overwrite") : false;
+        
+        if (overwrite) destinationFile.delete();
 
         int audioStreamType;
         switch(audioStreamTypeString) {
@@ -503,14 +538,22 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
             params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audioStreamType);
             params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume);
             params.putFloat(TextToSpeech.Engine.KEY_PARAM_PAN, pan);
-            return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params, utteranceId);
+            if (filename.length() > 0) {
+              return tts.synthesizeToFile(utterance, params, destinationFile, utteranceId);
+            } else {
+              return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params, utteranceId);
+            }
         } else {
             HashMap<String, String> params = new HashMap();
             params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
             params.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(audioStreamType));
             params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, String.valueOf(volume));
             params.put(TextToSpeech.Engine.KEY_PARAM_PAN, String.valueOf(pan));
-            return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params);
+            if (filename.length() > 0) {
+              return tts.synthesizeToFile(utterance, params, destinationFile.getPath());
+            } else {
+              return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params);
+            }
         }
     }
 
