@@ -196,6 +196,16 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void addListener(String eventName) {
+      // Keep: Required for RN built in Event Emitter Calls.
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+      // Keep: Required for RN built in Event Emitter Calls.
+    }
+
+    @ReactMethod
     public void getInitStatus(Promise promise) {
         synchronized(initStatusPromises) {
             if(ready == null) {
@@ -239,14 +249,14 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
         if(notReady(promise)) return;
         
         if (!params.hasKey("KEY_PARAM_FILENAME")) {
-          promise.reject("missing KEY_PARAM_FILENAME");
+          promise.reject("missing filename");
           return;
         }
         
         String filename = params.getString("KEY_PARAM_FILENAME");
 
         if (filename.length() == 0) {
-            promise.reject("missing filename");
+            promise.reject("filename is empty");
             return;
         }
         File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
