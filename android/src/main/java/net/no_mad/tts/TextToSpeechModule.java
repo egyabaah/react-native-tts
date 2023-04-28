@@ -259,13 +259,13 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
             promise.reject("filename is empty");
             return;
         }
-        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
+        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".mp3");
 
         String utteranceId = Integer.toString(utterance.hashCode());
 
         int speakResult = speak(utterance, utteranceId, params);
         if(speakResult == TextToSpeech.SUCCESS) {
-            promise.resolve(destinationFile.getAbsolutePath());
+            promise.resolve(Uri.fromFile(destinationFile).toString());
         } else {
             resolvePromiseWithStatusCode(speakResult, promise);
         }
