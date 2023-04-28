@@ -265,7 +265,7 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
 
         int speakResult = speak(utterance, utteranceId, params);
         if(speakResult == TextToSpeech.SUCCESS) {
-            promise.resolve(destinationFile.getPath());
+            promise.resolve(destinationFile.getAbsolutePath());
         } else {
             resolvePromiseWithStatusCode(speakResult, promise);
         }
