@@ -1,11 +1,11 @@
 {
-  "name": "react-native-tts-reborn",
+  "name": "react-native-tts-export",
   "version": "5.1.6",
   "description": "React Native Text-To-Speech + Audio File Export module for Android and iOS - forked from ak1394/react-native-tts and includes the ability to export synthesized utterances to audio files",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/noodleofdeath/react-native-tts-reborn.git"
+    "url": "git+https://github.com/noodleofdeath/react-native-tts-export.git"
   },
   "keywords": [
     "tts",
@@ -20,7 +20,7 @@
   "author": "Houdini",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/noodleofdeath/react-native-tts-reborn/issues"
+    "url": "https://github.com/noodleofdeath/react-native-tts-export/issues"
   },
-  "homepage": "https://github.com/noodleofdeath/react-native-tts-reborn#readme"
+  "homepage": "https://github.com/noodleofdeath/react-native-tts-export#readme"
 }

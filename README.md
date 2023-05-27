@@ -12,8 +12,8 @@ React Native TTS is a text-to-speech library for [React Native](https://facebook
 ## Install
 
 ```shell
-npm install --save react-native-tts-reborn
-react-native link react-native-tts-reborn
+npm install --save react-native-tts-export
+react-native link react-native-tts-export
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ react-native link react-native-tts-reborn
 ### Imports
 
 ```js
-import Tts from 'react-native-tts-reborn';
+import Tts from 'react-native-tts-export';
 ```
 
 #### Windows
