@@ -1,4 +1,4 @@
-# React Native TTS (reborn with added export to audio file support)
+# React Native TTS + Audio File Export
 
 <p align="center">
   <a href="https://github.com/facebook/react-native/blob/HEAD/LICENSE">
@@ -7,34 +7,68 @@
   <a href="https://www.npmjs.org/package/react-native-tts-export">
     <img src="https://img.shields.io/npm/v/react-native-tts-export?color=brightgreen&label=npm%20package" alt="Current npm package version." />
   </a>
+  <a href="https://www.npmjs.org/package/react-native-tts-export">
+    <img src="https://img.shields.io/npm/dt/react-native-tts-export" alt="Npm downloads." />
+  </a>
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome!" />
 </p>
+<p align="center">
+  <a href="https://github.com/NoodleOfDeath/react-native-tts-export/actions/workflows/windows-ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/noodleofdeath/react-native-tts-export/windows-ci.yml" alt="Windows build" />
+  </a>
+</p>
 
-React Native TTS is a text-to-speech library for [React Native](https://facebook.github.io/react-native/) on iOS, Android, and Windows.
+React Native TTS Export is a text-to-speech library fork of [react-native-tts](https://github.com/ak1394/react-native-tts)
+ for [React Native](https://facebook.github.io/react-native/) on iOS, Android, and Windows **with added audio file export functionality.**
 
-## Documentation
 
-- [Install](#install)
-- [Usage](#usage)
-- [License](#license)
-- [Example project](#example)
+## Table of Contents <!-- omit in toc -->
+
+- [React Native TTS + Audio File Export](#react-native-tts--audio-file-export)
+  - [Install](#install)
+    - [Automatic Linking](#automatic-linking)
+  - [Usage](#usage)
+    - [Windows](#windows)
+    - [Speaking](#speaking)
+    - [Exporting to Audio File](#exporting-to-audio-file)
+    - [Waiting for initialization](#waiting-for-initialization)
+    - [Ducking](#ducking)
+    - [List Voices](#list-voices)
+    - [Set default Language](#set-default-language)
+    - [Set default Voice](#set-default-voice)
+    - [Set default Speech Rate](#set-default-speech-rate)
+    - [Set default Pitch](#set-default-pitch)
+    - [Controls the iOS silent switch behavior](#controls-the-ios-silent-switch-behavior)
+    - [Events](#events)
+    - [Support for multiple TTS engines](#support-for-multiple-tts-engines)
+    - [Install (additional) language data](#install-additional-language-data)
+  - [Troubleshooting](#troubleshooting)
+    - [No text to speech engine installed on Android](#no-text-to-speech-engine-installed-on-android)
+  - [Example](#example)
 
 ## Install
 
 ```shell
 npm install --save react-native-tts-export
+```
+
+```shell
+yarn add react-native-tts-export
+```
+
+### Automatic Linking
+
+```shell
 react-native link react-native-tts-export
 ```
 
 ## Usage
 
-### Imports
-
 ```js
 import Tts from 'react-native-tts-export';
 ```
 
-#### Windows
+### Windows
 
 1. In `windows/myapp.sln` add the `RNTTS` project to your solution:
 
@@ -59,10 +93,10 @@ Add utterance to TTS queue and start speaking. Returns promise with utteranceId.
 Tts.speak('Hello, world!');
 ```
 
-Additionally, speak() allows to pass platform-specific options.
+Additionally, `speak()` allows to pass platform-specific options.
 
 ```js
-// IOS
+// iOS
 Tts.speak('Hello, world!', {
   iosVoiceId: 'com.apple.ttsbundle.Moira-compact',
   rate: 0.5,
@@ -85,9 +119,9 @@ For more detail on `androidParams` properties, please take a look at [official a
 
 - For `KEY_PARAM_STREAM` property, you can currently use one of `STREAM_ALARM`, `STREAM_DTMF`, `STREAM_MUSIC`, `STREAM_NOTIFICATION`, `STREAM_RING`, `STREAM_SYSTEM`, `STREAM_VOICE_CALL`,
 
-The supported options for IOS are:
+The supported options for iOS are:
 
-- `iosVoiceId` which voice to use, check [voices()](#list-voices) for available values
+- `iosVoiceId` which voice to use, check [`voices()`](#list-voices) for available values
 - `rate` which speech rate this line should be spoken with. Will override [default rate](#set-default-speech-rate) if set for this utterance.
 
 Stop speaking and flush the TTS queue.
@@ -100,19 +134,34 @@ Tts.stop();
 
 *(not supported in Windows yet)*
 
-Exports an utterance to an audio file that can be used for track playing with [react-native-track-player](https://www.npmjs.com/package/react-native-track-player) or used by another app. For iOS, this will generate a .caf file and on Android a .wav file.
+Exports an utterance to an audio file that can be used for track playing with [react-native-track-player](https://www.npmjs.com/package/react-native-track-player) or used by another app. This file will be generated in the app's cache directory.
+
+Additionally, `export()` takes in all of the same parameters as [`speak()`](#speaking).
+
+- iOS, will generate a `.caf` file.
+- Android, will generate a `.wav` file.
 
 ```js
-const filepath = await Tts.export('Hello, world!', { filename: 'myfile' });
+const filepath = await Tts.export('Hello, world!', {
+  filename: 'myfile', 
+  overwrite: true, // optional (not passing true will return the already existing file)
+  ...
+  iosVoiceId: 'com.apple.ttsbundle.Moira-compact',
+  rate: 0.5,
+  androidParams: {
+    ...
+  },
+});
+console.log(filepath); 
+// /storage/emulated/0/.../cache/myfile.wav
+// /var/mobile/Containers/.../Caches/myfile.caf
 ```
-
-Additionally, export() takes in all of the same parameters as speak().
 
 ### Waiting for initialization
 
-On some platforms it could take some time to initialize TTS engine, and Tts.speak() will fail to speak until the engine is ready.
+On some platforms it could take some time to initialize TTS engine, and `Tts.speak()` will fail to speak until the engine is ready.
 
-To wait for successfull initialization you could use getInitStatus() call.
+To wait for successfull initialization you could use `getInitStatus()` call.
 
 ```js
 Tts.getInitStatus().then(() => {
@@ -165,7 +214,7 @@ Tts.setDefaultLanguage('en-IE');
 
 ### Set default Voice
 
-Sets default voice, pass one of the voiceId as reported by a call to Tts.voices()
+Sets default voice, pass one of the voiceId as reported by a call to `Tts.voices()`
 
 *(not available on Android API Level < 21)*
 
@@ -261,31 +310,3 @@ Tts.getInitStatus().then(() => {
 ## Example
 
 There is an example project which shows use of react-native-tts on Android/iOS/Windows: https://github.com/themostaza/react-native-tts-example
-
-## License
-
-The MIT License (MIT)
-=====================
-
-Copyright © `2016` `Anton Krasovsky`
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the “Software”), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
