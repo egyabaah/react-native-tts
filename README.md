@@ -1,5 +1,15 @@
 # React Native TTS (reborn with added export to audio file support)
 
+<p align="center">
+  <a href="https://github.com/facebook/react-native/blob/HEAD/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="React Native is released under the MIT license." />
+  </a>
+  <a href="https://www.npmjs.org/package/react-native-tts-export">
+    <img src="https://img.shields.io/npm/v/react-native-tts-export?color=brightgreen&label=npm%20package" alt="Current npm package version." />
+  </a>
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome!" />
+</p>
+
 React Native TTS is a text-to-speech library for [React Native](https://facebook.github.io/react-native/) on iOS, Android, and Windows.
 
 ## Documentation
@@ -136,15 +146,15 @@ Tts.voices().then(voices => console.log(voices));
 // { id: 'com.apple.ttsbundle.Samantha-compact', name: 'Samantha', language: 'en-US' } ]
 ```
 
-|Voice field|Description|
-|-----|-------|
-|id   |Unique voice identifier (e.g. `com.apple.ttsbundle.Moira-compact`)|
-|name |Name of the voice *(iOS only)*|
-|language|BCP-47 language code (e.g. 'en-US')|
-|quality|Voice quality (300 = normal, 500 = enhanced/very high)|
-|latency|Expected synthesizer latency (100 = very low, 500 = very high) *(Android only)*|
-|networkConnectionRequired|True when the voice requires an active network connection *(Android only)*|
-|notInstalled|True when the voice may need to download additional data to be fully functional *(Android only)*|
+| Voice field               | Description                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| id                        | Unique voice identifier (e.g. `com.apple.ttsbundle.Moira-compact`)                               |
+| name                      | Name of the voice *(iOS only)*                                                                   |
+| language                  | BCP-47 language code (e.g. 'en-US')                                                              |
+| quality                   | Voice quality (300 = normal, 500 = enhanced/very high)                                           |
+| latency                   | Expected synthesizer latency (100 = very low, 500 = very high) *(Android only)*                  |
+| networkConnectionRequired | True when the voice requires an active network connection *(Android only)*                       |
+| notInstalled              | True when the voice may need to download additional data to be fully functional *(Android only)* |
 
 
 ### Set default Language
