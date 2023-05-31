@@ -1,4 +1,4 @@
-# React Native TTS + Audio File Export
+# React Native TTS + Audio File Export <!-- omit in toc -->
 
 <p align="center">
   <a href="https://github.com/facebook/react-native/blob/HEAD/LICENSE">
@@ -24,27 +24,26 @@ React Native TTS Export is a text-to-speech library fork of [react-native-tts](h
 
 ## Table of Contents <!-- omit in toc -->
 
-- [React Native TTS + Audio File Export](#react-native-tts--audio-file-export)
-  - [Install](#install)
-    - [Automatic Linking](#automatic-linking)
-  - [Usage](#usage)
-    - [Windows](#windows)
-    - [Speaking](#speaking)
-    - [Exporting to Audio File](#exporting-to-audio-file)
-    - [Waiting for initialization](#waiting-for-initialization)
-    - [Ducking](#ducking)
-    - [List Voices](#list-voices)
-    - [Set default Language](#set-default-language)
-    - [Set default Voice](#set-default-voice)
-    - [Set default Speech Rate](#set-default-speech-rate)
-    - [Set default Pitch](#set-default-pitch)
-    - [Controls the iOS silent switch behavior](#controls-the-ios-silent-switch-behavior)
-    - [Events](#events)
-    - [Support for multiple TTS engines](#support-for-multiple-tts-engines)
-    - [Install (additional) language data](#install-additional-language-data)
-  - [Troubleshooting](#troubleshooting)
-    - [No text to speech engine installed on Android](#no-text-to-speech-engine-installed-on-android)
-  - [Example](#example)
+- [Install](#install)
+  - [Automatic Linking](#automatic-linking)
+- [Usage](#usage)
+  - [Windows](#windows)
+  - [Speaking](#speaking)
+  - [Exporting to Audio File](#exporting-to-audio-file)
+  - [Waiting for initialization](#waiting-for-initialization)
+  - [Ducking](#ducking)
+  - [List Voices](#list-voices)
+  - [Set default Language](#set-default-language)
+  - [Set default Voice](#set-default-voice)
+  - [Set default Speech Rate](#set-default-speech-rate)
+  - [Set default Pitch](#set-default-pitch)
+  - [Controls the iOS silent switch behavior](#controls-the-ios-silent-switch-behavior)
+  - [Events](#events)
+  - [Support for multiple TTS engines](#support-for-multiple-tts-engines)
+  - [Install (additional) language data](#install-additional-language-data)
+- [Troubleshooting](#troubleshooting)
+  - [No text to speech engine installed on Android](#no-text-to-speech-engine-installed-on-android)
+- [Example](#example)
 
 ## Install
 
