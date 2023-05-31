@@ -12,11 +12,6 @@
   </a>
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome!" />
 </p>
-<p align="center">
-  <a href="https://github.com/NoodleOfDeath/react-native-tts-export/actions/workflows/windows-ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/noodleofdeath/react-native-tts-export/windows-ci.yml" alt="Windows build" />
-  </a>
-</p>
 
 React Native TTS Export is a text-to-speech library fork of [react-native-tts](https://github.com/ak1394/react-native-tts)
  for [React Native](https://facebook.github.io/react-native/) on iOS, Android, and Windows **with added audio file export functionality.**
@@ -144,7 +139,7 @@ Additionally, `export()` takes in all of the same parameters as [`speak()`](#spe
 const filepath = await Tts.export('Hello, world!', {
   filename: 'myfile', 
   overwrite: true, // optional (not passing true will return the already existing file)
-  ...
+  ...,
   iosVoiceId: 'com.apple.ttsbundle.Moira-compact',
   rate: 0.5,
   androidParams: {
