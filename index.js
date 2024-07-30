@@ -93,6 +93,23 @@ class Tts extends NativeEventEmitter {
     }
   }
 
+  export(utterance, options = {}) {
+    // TODO: autogenerate filename
+    if (typeof options === 'string') {
+      return TextToSpeech.speak(utterance, { iosVoiceId: options });
+    } else {
+      if (Platform.OS === 'ios' || Platform.OS === 'windows') {
+        return TextToSpeech.export(utterance, options);
+      } else {
+        return TextToSpeech.export(utterance, {
+          KEY_PARAM_FILENAME: options.filename,
+          KEY_PARAM_OVERWRITE: options.overwrite,
+          ...(options.androidParams || {}),
+        });
+      }
+    }
+  }
+
   stop(onWordBoundary) {
     if (Platform.OS === 'ios') {
       return TextToSpeech.stop(onWordBoundary);

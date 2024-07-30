@@ -1,11 +1,12 @@
 package net.no_mad.tts;
 
+import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
+
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
-import android.app.Activity;
 import android.net.Uri;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -16,6 +17,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import com.facebook.react.bridge.*;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -176,7 +178,7 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
             default:
                 promise.reject("error", "Unknown error code: " + statusCode);
                 break;
-          }
+        }
     }
 
     private boolean isPackageInstalled(String packageName) {
@@ -192,6 +194,16 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "TextToSpeech";
+    }
+
+    @ReactMethod
+    public void addListener(String eventName) {
+        // Keep: Required for RN built in Event Emitter Calls.
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // Keep: Required for RN built in Event Emitter Calls.
     }
 
     @ReactMethod
@@ -212,10 +224,10 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
         if(ducking) {
             // Request audio focus for playback
             int amResult = audioManager.requestAudioFocus(afChangeListener,
-                                                          // Use the music stream.
-                                                          AudioManager.STREAM_MUSIC,
-                                                          // Request permanent focus.
-                                                          AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+                    // Use the music stream.
+                    AudioManager.STREAM_MUSIC,
+                    // Request permanent focus.
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
 
             if(amResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 promise.reject("Android AudioManager error, failed to request audio focus");
@@ -234,6 +246,54 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void export(String utterance, ReadableMap params, Promise promise) {
+        if(notReady(promise)) return;
+
+        if (!params.hasKey("KEY_PARAM_FILENAME")) {
+            promise.reject("missing filename");
+            return;
+        }
+
+        String filename = params.getString("KEY_PARAM_FILENAME");
+
+        if (filename.length() == 0) {
+            promise.reject("filename is empty");
+            return;
+        }
+        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
+
+        String exportedUtteranceId = Integer.toString(utterance.hashCode());
+
+        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+            }
+            @Override
+            // this method will always called from a background thread.
+            public void onDone(String utteranceId) {
+                // only respond to the most recent utterance
+                if (!utteranceId.equals(exportedUtteranceId)) {
+                    return;
+                } // else continue...
+                boolean wasCalledFromBackgroundThread = (Thread.currentThread().getId() != 1);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        promise.resolve(destinationFile.getPath());
+                    }
+                });
+            }
+            @Override
+            public void onError(String utteranceId) {
+                promise.reject("error writing to to file");
+            }
+        });
+
+        speak(utterance, exportedUtteranceId, params);
+
+    }
+
+    @ReactMethod
     public void setDefaultLanguage(String language, Promise promise) {
         if(notReady(promise)) return;
 
@@ -247,10 +307,10 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
         }
 
         try {
-          int result = tts.setLanguage(locale);
-          resolvePromiseWithStatusCode(result, promise);
+            int result = tts.setLanguage(locale);
+            resolvePromiseWithStatusCode(result, promise);
         } catch (Exception e) {
-          promise.reject("error", "Unknown error code");
+            promise.reject("error", "Unknown error code");
         }
     }
 
@@ -302,8 +362,8 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
                     }
                 }
             } catch (Exception e) {
-              // Purposefully ignore exceptions here due to some buggy TTS engines.
-              // See http://stackoverflow.com/questions/26730082/illegalargumentexception-invalid-int-os-with-samsung-tts
+                // Purposefully ignore exceptions here due to some buggy TTS engines.
+                // See http://stackoverflow.com/questions/26730082/illegalargumentexception-invalid-int-os-with-samsung-tts
             }
             promise.reject("not_found", "The selected voice was not found");
         } else {
@@ -338,8 +398,8 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
                     voiceArray.pushMap(voiceMap);
                 }
             } catch (Exception e) {
-              // Purposefully ignore exceptions here due to some buggy TTS engines.
-              // See http://stackoverflow.com/questions/26730082/illegalargumentexception-invalid-int-os-with-samsung-tts
+                // Purposefully ignore exceptions here due to some buggy TTS engines.
+                // See http://stackoverflow.com/questions/26730082/illegalargumentexception-invalid-int-os-with-samsung-tts
             }
         }
 
@@ -464,6 +524,12 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
         float volume = inputParams.hasKey("KEY_PARAM_VOLUME") ? (float) inputParams.getDouble("KEY_PARAM_VOLUME") : 1.0f;
         float pan = inputParams.hasKey("KEY_PARAM_PAN") ? (float) inputParams.getDouble("KEY_PARAM_PAN") : 0.0f;
 
+        String filename = inputParams.hasKey("KEY_PARAM_FILENAME") ? inputParams.getString("KEY_PARAM_FILENAME") : "";
+        File destinationFile = new File(getReactApplicationContext().getCacheDir(), filename + ".wav");
+        boolean overwrite = inputParams.hasKey("KEY_PARAM_OVERWRITE") ? inputParams.getBoolean("KEY_PARAM_OVERWRITE") : false;
+
+        if (overwrite) destinationFile.delete();
+
         int audioStreamType;
         switch(audioStreamTypeString) {
             /*
@@ -503,14 +569,22 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
             params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, audioStreamType);
             params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume);
             params.putFloat(TextToSpeech.Engine.KEY_PARAM_PAN, pan);
-            return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params, utteranceId);
+            if (filename.length() > 0) {
+                return tts.synthesizeToFile(utterance, params, destinationFile, utteranceId);
+            } else {
+                return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params, utteranceId);
+            }
         } else {
             HashMap<String, String> params = new HashMap();
             params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
             params.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(audioStreamType));
             params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, String.valueOf(volume));
             params.put(TextToSpeech.Engine.KEY_PARAM_PAN, String.valueOf(pan));
-            return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params);
+            if (filename.length() > 0) {
+                return tts.synthesizeToFile(utterance, params, destinationFile.getPath());
+            } else {
+                return tts.speak(utterance, TextToSpeech.QUEUE_ADD, params);
+            }
         }
     }
 
