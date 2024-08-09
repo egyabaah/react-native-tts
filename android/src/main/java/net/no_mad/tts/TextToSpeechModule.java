@@ -96,8 +96,8 @@ public class TextToSpeechModule extends ReactContextBaseJavaModule {
                 public void onRangeStart (String utteranceId, int start, int end, int frame) {
                     WritableMap params = Arguments.createMap();
                     params.putString("utteranceId", utteranceId);
-                    params.putInt("start", start);
-                    params.putInt("end", end);
+                    params.putInt("location", start);
+                    params.putInt("length", end);
                     params.putInt("frame", frame);
                     sendEvent("tts-progress", params);
                 }
