@@ -349,11 +349,13 @@ RCT_EXPORT_METHOD(voices:(RCTPromiseResolveBlock)resolve
 
 -(void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer willSpeakRangeOfSpeechString:(NSRange)characterRange utterance:(AVSpeechUtterance *)utterance
 {
+    NSUInteger endLocation = characterRange.location + characterRange.length;
     [self sendEventWithName:@"tts-progress"
-                       body:@{@"location": [NSNumber numberWithUnsignedLong:characterRange.location],
-                              @"length": [NSNumber numberWithUnsignedLong:characterRange.length],
-                              @"utteranceId": [NSNumber numberWithUnsignedLong:utterance.hash]}];
+                        body:@{@"start": [NSNumber numberWithUnsignedLong:characterRange.location],
+                                @"end": [NSNumber numberWithUnsignedLong:endLocation],
+                                @"utteranceId": [NSNumber numberWithUnsignedLong:utterance.hash]}];
 }
+
 
 -(void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didCancelSpeechUtterance:(AVSpeechUtterance *)utterance
 {

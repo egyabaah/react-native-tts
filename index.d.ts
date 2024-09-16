@@ -8,8 +8,8 @@ type SimpleEvent = {
 type ProgressEventName = "tts-progress";
 type ProgressEvent = {
   utteranceId: string | number;
-  location: number;
-  length: number;
+  start: number;
+  end: number;
 };
 
 export type TtsEvents = SimpleEvents | ProgressEventName;
