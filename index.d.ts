@@ -10,8 +10,6 @@ type ProgressEvent = {
   utteranceId: string | number;
   location: number;
   length: number;
-  frame?: number;
-
 };
 
 export type TtsEvents = SimpleEvents | ProgressEventName;
