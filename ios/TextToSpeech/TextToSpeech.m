@@ -231,6 +231,12 @@ RCT_EXPORT_METHOD(voices:(RCTPromiseResolveBlock)resolve
 
 -(void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didStartSpeechUtterance:(AVSpeechUtterance *)utterance
 {
+    [[AVAudioSession sharedInstance]
+     setCategory:AVAudioSessionCategoryPlayback
+     mode:AVAudioSessionModeVoicePrompt
+     options:AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers
+     error:nil];
+    
     if(_ducking) {
         [[AVAudioSession sharedInstance] setActive:YES error:nil];
     }
