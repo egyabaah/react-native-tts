@@ -176,7 +176,7 @@ RCT_EXPORT_METHOD(export:(NSString *)text
     }];
 }
 
-RCT_EXPORT_METHOD(stop:(BOOL *)onWordBoundary resolve:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(stop:(BOOL)onWordBoundary resolve:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
 {
     AVSpeechBoundary boundary;
 
@@ -191,7 +191,7 @@ RCT_EXPORT_METHOD(stop:(BOOL *)onWordBoundary resolve:(RCTPromiseResolveBlock)re
     resolve([NSNumber numberWithBool:stopped]);
 }
 
-RCT_EXPORT_METHOD(pause:(BOOL *)onWordBoundary resolve:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(pause:(BOOL)onWordBoundary resolve:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPromiseRejectBlock)reject)
 {
     AVSpeechBoundary boundary;
 
@@ -214,7 +214,7 @@ RCT_EXPORT_METHOD(resume:(RCTPromiseResolveBlock)resolve reject:(__unused RCTPro
 }
 
 
-RCT_EXPORT_METHOD(setDucking:(BOOL *)ducking
+RCT_EXPORT_METHOD(setDucking:(BOOL)ducking
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(__unused RCTPromiseRejectBlock)reject)
 {
